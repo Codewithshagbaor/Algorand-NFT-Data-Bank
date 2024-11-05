@@ -21,3 +21,4 @@ tzdata==2024.2
 urllib3==2.2.3
 varint==1.0.2
 gunicorn
+django-cors-headers
