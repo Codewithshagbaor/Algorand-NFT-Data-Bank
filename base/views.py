@@ -22,7 +22,7 @@ CREATOR_PRIVATE_KEY =settings.PRIVATE_KEY
 PINATA_API_KEY = settings.PINATA_API_KEY
 PINATA_SECRET_API_KEY = settings.PINATA_SECRET_API_KEY
 
-def mint_nft(user_wallet_address, ipfs_hash):
+def mint_nft(user_wallet_address, document_name, ipfs_hash):
     # Initialize Algod client
     algod_client = algod.AlgodClient(algod_token=ALGOD_TOKEN, algod_address=ALGOD_ADDRESS)
 
@@ -41,7 +41,7 @@ def mint_nft(user_wallet_address, ipfs_hash):
         sp=params,
         default_frozen=False,
         unit_name="DOCNFT",
-        asset_name="DocumentNFT",
+        asset_name=document_name,
         manager=CREATOR_ADDRESS,
         reserve=CREATOR_ADDRESS,
         freeze=CREATOR_ADDRESS,
@@ -100,10 +100,11 @@ class DocumentUploadView(APIView):
         serializer = DocumentUploadSerializer(data=request.data)
         if serializer.is_valid():
             document = serializer.validated_data['document']
+            document_name = serializer.validated_data['document_name']
             user_wallet_address = serializer.validated_data['user_wallet_address']
             try:
                 ipfs_hash = upload_to_pinata(document)
-                txid = mint_nft(user_wallet_address, ipfs_hash)
+                txid = mint_nft(user_wallet_address, document_name, ipfs_hash)
                 logger.info(f"Document uploaded and NFT minted. Transaction ID: {txid}")
                 return Response({'transaction_id': txid})
             except Exception as e:
