@@ -90,7 +90,7 @@ def upload_to_pinata(document):
         if response.status_code != 200:
             raise Exception("Failed to upload to Pinata: " + response.text)
         ipfs_hash = response.json()["IpfsHash"]
-        return Response(ipfs_hash)
+        return str(ipfs_hash)
     except Exception as e:
         logger.error(f"Uploading to Pinata failed for document: {str(e)}")
         return Response({"error": str(e)}, status=500)
@@ -104,6 +104,8 @@ class DocumentUploadView(APIView):
             user_wallet_address = serializer.validated_data['user_wallet_address']
             try:
                 ipfs_hash = upload_to_pinata(document)
+                ipfs_url = ipfs_hash
+                print(f"Document uploaded to IPFS: {ipfs_url}")
                 txid = mint_nft(user_wallet_address, document_name, ipfs_hash)
                 logger.info(f"Document uploaded and NFT minted. Transaction ID: {txid}")
                 return Response({'transaction_id': txid})
